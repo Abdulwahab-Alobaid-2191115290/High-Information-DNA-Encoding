@@ -4,6 +4,28 @@ import numpy as np
 import math
 
 
+def encoding(array):
+
+    dna = ""
+    recipe = ""
+    for (a, b, c) in array:
+        if a >= b and b >= c and a >= c:
+            dna += "A"
+        elif a <= b and b <= c and a <= c:
+            dna += "T"
+        elif a >= b and b <= c and a >= c:
+            dna += "G"
+        elif a >= b and b <= c and a <= c:
+            dna += "C"
+        else:
+            print("unhandled: ", (a, b, c))
+        recipe += f"{dna[-1]}({a}, {b}, {c}) \n"
+
+    print(dna)
+    print(recipe)
+
+    return dna, recipe
+
 # turns an array of tuples it into a square matrix with fill_value as padding
 def squarify(array, fill_value=(255, 255, 255)):
     num_elements = len(array)
@@ -51,6 +73,9 @@ def txt_to_png(src):
     # creating rgb tuples i.e. the pixels of the image
     pixels = tuplify(src_ascii, 3)
     print("pixel tuples: ", pixels, "\n")
+
+    print(len(pixels))
+    encoding(pixels)
 
     # making sure the image is always a square, padding is added as required
     pixel_square_matrix = squarify(pixels)
