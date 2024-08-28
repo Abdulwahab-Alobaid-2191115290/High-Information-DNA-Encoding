@@ -4,27 +4,31 @@ import numpy as np
 import math
 
 
-def encoding(array):
+# Encoding function
+def encoding(pixel_matrix):
 
     dna = ""
     recipe = ""
-    for (a, b, c) in array:
-        if a >= b and b >= c and a >= c:
-            dna += "A"
-        elif a <= b and b <= c and a <= c:
-            dna += "T"
-        elif a >= b and b <= c and a >= c:
-            dna += "G"
-        elif a >= b and b <= c and a <= c:
-            dna += "C"
-        else:
-            print("unhandled: ", (a, b, c))
-        recipe += f"{dna[-1]}({a}, {b}, {c}) \n"
-
-    print(dna)
-    print(recipe)
+    for pixel_array in pixel_matrix:
+        for (a, b, c) in pixel_array:
+            if a >= b and b >= c and a >= c:
+                dna += "A"
+            elif a <= b and b <= c and a <= c:
+                dna += "T"
+            elif a >= b and b <= c and a >= c:
+                dna += "G"
+            elif a >= b and b <= c and a <= c:
+                dna += "C"
+            else:
+                # extra cases that affect the nucleotide distribution
+                if a <= b and b >= c and a <= c:
+                    dna += "N"
+                elif a <= b and b >= c and a <= c:
+                    dna += "N"
+            recipe += f"{dna[-1]}({a}, {b}, {c}) \n"
 
     return dna, recipe
+
 
 # turns an array of tuples it into a square matrix with fill_value as padding
 def squarify(array, fill_value=(255, 255, 255)):
@@ -74,19 +78,26 @@ def txt_to_png(src):
     pixels = tuplify(src_ascii, 3)
     print("pixel tuples: ", pixels, "\n")
 
-    print(len(pixels))
-    encoding(pixels)
-
     # making sure the image is always a square, padding is added as required
-    pixel_square_matrix = squarify(pixels)
+    pixel_matrix = squarify(pixels)
 
     # print the matrix
     print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
-    for _ in pixel_square_matrix:
+    for _ in pixel_matrix:
         print(_)
 
+    dna, recipe = encoding(pixel_matrix)
+    print(dna)
+
+    # writing files
+    with open("recipe.txt", "w") as recipe_file:
+        recipe_file.write(recipe)
+    with open("encoded_data.fasta", "w") as fasta_file:
+        fasta_file.write("> encoded_data \n")
+        fasta_file.write(dna + " \n")
+
     # conversion from pixel matrix to image
-    array = np.array(pixel_square_matrix, dtype=np.uint8)
+    array = np.array(pixel_matrix, dtype=np.uint8)
     new_image = Image.fromarray(array)
     new_image.save('new.png')
 
