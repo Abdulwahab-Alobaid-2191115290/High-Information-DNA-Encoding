@@ -4,16 +4,19 @@ import numpy as np
 import math
 
 # Decoding based on recipe
-def decode(recipe):
+def decode(recipe, padding):
     ascii_str = ''
-    for line in recipe.splitlines():
+
+    # removing global padding
+    for line in recipe.splitlines()[:(padding["global"])*-1]:
         rgb_str_list = line.strip('ATGCN(')[:-2].split(', ')
         rgb_int_list = [int(val) for val in rgb_str_list]
 
         ascii_list = [chr(val) for val in rgb_int_list]
         ascii_str += "".join(ascii_list)
 
-    return ascii_str
+    # removing local padding
+    return ascii_str[:(padding["local"]*-1 - 1)]
 
 # Encoding function
 def encode(pixel_matrix):
@@ -48,6 +51,9 @@ def squarify(array, fill_value=(255, 255, 255)):
     # get size of the square matrix
     matrix_size = math.ceil(math.sqrt(num_elements))
 
+    # calculate global padding for decoding
+    global_padding = matrix_size**2 - num_elements
+
     # initialize matrix with fill_value
     matrix = [[fill_value for _ in range(matrix_size)] for _ in range(matrix_size)]
 
@@ -58,7 +64,7 @@ def squarify(array, fill_value=(255, 255, 255)):
             if index < num_elements:
                 matrix[i][j] = array[index]
 
-    return matrix
+    return matrix, global_padding
 
 
 # groups array elements into groups of 3 i.e. tuples. Padded with 255 when required
@@ -85,12 +91,17 @@ def txt_to_png(src):
         src_ascii.append(ord(char))
     # print("characters: ", src_ascii, "\n")
 
+    tuple_size = 3      # 3 for RGB, 4 for RGBA if required
+
+    # local padding: used for decoding
+    local_padding = len(src_ascii) % tuple_size
+
     # creating rgb tuples i.e. the pixels of the image
     pixels = tuplify(src_ascii, 3)
     # print("pixel tuples: ", pixels, "\n")
 
     # making sure the image is always a square, padding is added as required
-    pixel_matrix = squarify(pixels)
+    pixel_matrix, global_padding = squarify(pixels)
 
     # print the matrix
     # print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
@@ -103,6 +114,8 @@ def txt_to_png(src):
     # writing files
     with open("recipe.txt", "w") as recipe_file:
         recipe_file.write(recipe)
+        recipe_file.write(f"{local_padding}, {global_padding}")
+
     with open("encoded_data.fasta", "w") as fasta_file:
         fasta_file.write("> encoded_data \n")
         fasta_file.write(dna + " \n")
@@ -112,10 +125,12 @@ def txt_to_png(src):
     new_image = Image.fromarray(array)
     new_image.save('new.png')
 
-    return dna, recipe
+    padding = {"local": local_padding, "global": global_padding}
+
+    return dna, recipe, padding
 
 
-dna, recipe = txt_to_png("hey, this is wahab as an image")
-decoded = decode(recipe)
+dna, recipe, padding = txt_to_png("hey, this is wahab as an image")
+decoded = decode(recipe, padding)
 
 print(decoded)
