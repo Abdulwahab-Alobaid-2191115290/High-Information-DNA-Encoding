@@ -3,9 +3,20 @@ from PIL import Image
 import numpy as np
 import math
 
+# Decoding based on recipe
+def decode(recipe):
+    ascii_str = ''
+    for line in recipe.splitlines():
+        rgb_str_list = line.strip('ATGCN(')[:-2].split(', ')
+        rgb_int_list = [int(val) for val in rgb_str_list]
+
+        ascii_list = [chr(val) for val in rgb_int_list]
+        ascii_str += "".join(ascii_list)
+
+    return ascii_str
 
 # Encoding function
-def encoding(pixel_matrix):
+def encode(pixel_matrix):
 
     dna = ""
     recipe = ""
@@ -72,22 +83,22 @@ def txt_to_png(src):
     src_ascii = []
     for char in src:
         src_ascii.append(ord(char))
-    print("characters: ", src_ascii, "\n")
+    # print("characters: ", src_ascii, "\n")
 
     # creating rgb tuples i.e. the pixels of the image
     pixels = tuplify(src_ascii, 3)
-    print("pixel tuples: ", pixels, "\n")
+    # print("pixel tuples: ", pixels, "\n")
 
     # making sure the image is always a square, padding is added as required
     pixel_matrix = squarify(pixels)
 
     # print the matrix
-    print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
-    for _ in pixel_matrix:
-        print(_)
+    # print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
+    # for _ in pixel_matrix:
+    #     print(_)
 
-    dna, recipe = encoding(pixel_matrix)
-    print(dna)
+    dna, recipe = encode(pixel_matrix)
+    # print(dna)
 
     # writing files
     with open("recipe.txt", "w") as recipe_file:
@@ -101,5 +112,10 @@ def txt_to_png(src):
     new_image = Image.fromarray(array)
     new_image.save('new.png')
 
+    return dna, recipe
 
-txt_to_png("hey, this is wahab as an image")
+
+dna, recipe = txt_to_png("hey, this is wahab as an image")
+decoded = decode(recipe)
+
+print(decoded)
