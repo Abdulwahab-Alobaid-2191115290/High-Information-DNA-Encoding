@@ -6,19 +6,32 @@ import math
 # Decoding based on recipe
 def decode(recipe, padding):
     ascii_str = ''
+    # print("recipe: ", recipe)
+    print(padding)
+    # removing global padding from recipe
+    if padding['global'] > 0:
+        recipe = recipe.splitlines()[:(padding["global"])*-1]
 
+    repixeled = []
     # removing global padding
-    for line in recipe.splitlines()[:(padding["global"])*-1]:
+    for line in recipe:
         rgb_str_list = line.strip('ATGCN(')[:-2].split(', ')
         rgb_int_list = [int(val) for val in rgb_str_list]
-
+        repixeled.append(rgb_int_list)
         ascii_list = [chr(val) for val in rgb_int_list]
         ascii_str += "".join(ascii_list)
 
+    # print("decoded: ")
+    # for _ in repixeled:
+    #     print(_)
+
     # removing local padding
-    return ascii_str[:(padding["local"]*-1 - 1)]
+    if padding["local"] > 0:
+        return ascii_str[:(padding["local"]*-1)]
+    return ascii_str
 
 # Encoding function
+# Idea: perhaps we can optimize encoding by removing the padding from the recipe file and only keep the global/local padding vals
 def encode(pixel_matrix):
 
     dna = ""
@@ -94,7 +107,9 @@ def txt_to_png(src):
     tuple_size = 3      # 3 for RGB, 4 for RGBA if required
 
     # local padding: used for decoding
-    local_padding = len(src_ascii) % tuple_size
+    local_padding = tuple_size - (len(src_ascii) % tuple_size)
+    # in case modulus gives 0, then padding will be = tuple size, which is wrong, hence we set padding = 0 to fix this bug
+    local_padding = 0 if local_padding == tuple_size else local_padding
 
     # creating rgb tuples i.e. the pixels of the image
     pixels = tuplify(src_ascii, 3)
@@ -104,9 +119,9 @@ def txt_to_png(src):
     pixel_matrix, global_padding = squarify(pixels)
 
     # print the matrix
-    # print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
-    # for _ in pixel_matrix:
-    #     print(_)
+    print(f"pixel matrix {math.ceil(math.sqrt(len(pixels)))}x{math.ceil(math.sqrt(len(pixels)))} with (255, 255, 255) as padding: ")
+    for _ in pixel_matrix:
+        print(_)
 
     dna, recipe = encode(pixel_matrix)
     # print(dna)
@@ -130,7 +145,7 @@ def txt_to_png(src):
     return dna, recipe, padding
 
 
-dna, recipe, padding = txt_to_png("hey, this is wahab as an image")
+dna, recipe, padding = txt_to_png("hey, this is wahab as an imageoa")
 decoded = decode(recipe, padding)
 
 print(decoded)
