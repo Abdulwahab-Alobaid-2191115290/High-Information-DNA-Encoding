@@ -40,6 +40,7 @@ This work simply focuses on information density, and ignores biological details 
 
 - GC content.
 - Homopolymer avoidance. As repeated nucleotides are bad for sequencing.
+- Avoidance of secondary structures and primer-dimer formations.
 - Some implementations such as ones by Organick et al. implement random access, they do it through having a primer for each strand(each strand represents a file). So involve primer design in their discussion.
 
 Although the current implementation does not adhere such constraints, the implemented algorithm acts as a placeholder, meaning it can be replaced with any other encoding method as long as produces a similiar codebook.
@@ -88,7 +89,13 @@ Additionally, one has to amount of redundancy required, this can also be influen
 
 # Future Directions
 
-
+- Apply error correction using HEDGES paper implementation https://github.com/whpress/hedges.
+- Identify error distributions (insertion%, deletion%, and substitution%), then identify exact tolerance for errors. This will help identify minimum redundancy required for this encoding method.
+- See possibilities for random access, Organick et al. work is relevant.
+- What are the implications of increasing information density? e.g. using RGBA instead of RGB, or any x-bits per nucleotide? We expect codebook and error correction to be directly affected.
+- Real test of the encoding scheme (a later step, when lab constraints are met).
+- DNA as an image wasn't an idea unique to this work, this work here applies studies on the image version of DNA https://github.com/MahdiKarimian/DIF, it might be possible to extend the work for this implementation.
+- Analyse encoding time and memory usage.
 
 
 
