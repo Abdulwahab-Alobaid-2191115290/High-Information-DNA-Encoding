@@ -1,3 +1,15 @@
+# Table of Contents
+
+1. [Introduction](#introduction)
+2. [Method](#method)
+   - [Encoding](#encoding)
+   - [Decoding](#decoding)
+3. [Results and Discussion](#results-and-discussion)
+   - [Lab Constraints](#lab-constraints)
+   - [Storage](#storage)
+   - [Error](#error)
+4. [Future Directions](#future-directions)
+
 # Introduction
 
 In the field of DNA based data storage, information density is always a competitive measure which contributes to the effeciency of the storage method. As increasing information density reduces DNA synthesis and sequencing costs.
